@@ -50,7 +50,6 @@
             </tbody>
         </table>
         <button type="button" class="btn btn-outline-primary" ng-disabled="currentPage == 0" ng-click="currentPage = currentPage - 1">Previous</button>
-
         {{currentPage + 1}} / {{maxNumber}}
         <button type="button" class="btn btn-outline-primary" ng-disabled="currentPage >= maxNumber - 1" ng-click="currentPage = currentPage + 1">Next</button>
     </div>
@@ -79,7 +78,7 @@
             $scope.disabled = null;
             $scope.visible = null;
             console.log(user);
-            if (user !== ''){
+            if (user !== '' && user !== $scope.tempUser){
                 $http({method: "POST", url: "http://public/rest_api/update", headers: {'Content-Type': undefined}, data: {id: id, user: user}}).
                 then(function successCallback (response) {
                     $scope.response=response.data;
