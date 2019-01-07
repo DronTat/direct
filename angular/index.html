@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="testApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+</head>
+<style>
+    .fa-pencil-alt:hover,
+    .fa-save:hover {
+        color: blue;
+    }
+    input{
+        width: 100%;
+        background: transparent !important;
+        border: none !important;
+    }
+    button:disabled:hover{
+        border-color: grey;
+        color: grey;
+    }
+    button:disabled{
+        border-color: grey;
+        color: grey !important;
+    }
+    .col-sm-6{
+        margin: 10px auto;
+    }
+</style>
+
+<body ng-controller="indexController">
+<div class="general">
+    <div class="col-sm-6">
+        <table class="table">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col">ФИО</th>
+                <th scope="col">Год рождения</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in items | limitTo: limit : currentPage * limit">
+                <td><input type="text" class="form-control" id="id-{{$index}}" ng-disabled="$index !== disabled" ng-model="item[1]"></td>
+                <td>{{item[2]}}</td>
+                <td><label class="fas fa-pencil-alt" for="id-{{$index}}" ng-hide="$index == visible" ng-click="edit($index, item[1])"></label><i class="fas fa-save" ng-show="$index == visible" ng-click="save($index, item[0], item[1])"></i></td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary" ng-disabled="currentPage == 0" ng-click="currentPage = currentPage - 1">Previous</button>
+
+        {{currentPage + 1}} / {{maxNumber}}
+        <button type="button" class="btn btn-outline-primary" ng-disabled="currentPage >= maxNumber - 1" ng-click="currentPage = currentPage + 1">Next</button>
+    </div>
+</div>
+
+
+
+<script src="src/angular.js"></script>
+<script>
+    var testApp = angular.module("testApp", []);
+    testApp.controller('indexController', function ($scope, $http){
+        $scope.currentPage = 0;
+        $scope.limit = 5;
+        $http({method: "POST", url: "http://public/rest_api/index"}).
+        then(function success(response) {
+            $scope.items = response.data;
+            $scope.maxNumber = Math.ceil($scope.items.length/$scope.limit)
+        });
+        $scope.edit = function (index, user) {
+            $scope.disabled = index;
+            $scope.visible = index;
+            $scope.tempUser = user;
+        };
+
+        $scope.save = function (index, id, user) {
+            $scope.disabled = null;
+            $scope.visible = null;
+            console.log(user);
+            if (user !== ''){
+                $http({method: "POST", url: "http://public/rest_api/update", headers: {'Content-Type': undefined}, data: {id: id, user: user}}).
+                then(function successCallback (response) {
+                    $scope.response=response.data;
+                    console.log($scope.response)
+                }, function errorCallback(response) {
+                    $scope.items[index][1] = $scope.tempUser;
+                    console.log(response.data)
+                });
+            } else {
+                $scope.items[index][1] = $scope.tempUser;
+                console.log('Не прошла валидацию');
+            }
+        };
+    });
+</script>
+
+</body>
+</html>
